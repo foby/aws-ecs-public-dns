@@ -1,0 +1,42 @@
+# Welcome to serverless. Read the docs
+# https://serverless.com/framework/docs/
+
+service: fargate-dns-demo
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: eu-central-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "ec2:DescribeNetworkInterfaces"
+        - "ecs:DescribeClusters"
+        - "ecs:ListTagsForResource"
+        - "route53:ChangeResourceRecordSets"
+      Resource: "*"  
+
+functions:
+  registerPublicIp:
+    memorySize: 128
+    handler: src/update-task-dns.handler
+    events:
+      - cloudwatchEvent:
+          event:
+            source:
+              - "aws.ecs"
+            detail-type:
+              - "ECS Task State Change"
+            detail:
+              desiredStatus:
+                - "RUNNING"
+              lastStatus:
+                - "RUNNING"
+
+package:
+  exclude:
+    - "**"
+  include:
+    - src/**
+    - node_modules/**
+    - "!node_modules/**/.serverless/**"
