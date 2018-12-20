@@ -42,9 +42,9 @@ exports.handler = async (event, context, callback) => {
     console.log(`task:${serviceName} public-id: ${taskPublicIp}`)
 
     const containerDomain = `${serviceName}.${domain}`
-    const changeRecordSet = createChangeRecordSet(containerDomain, taskPublicIp)
+    const recordSet = createRecordSet(containerDomain, taskPublicIp)
 
-    await updateDnsRecord(clusterName, hostedZoneId, changeRecordSet)
+    await updateDnsRecord(clusterName, hostedZoneId, recordSet)
     console.log(`DNS record update finished for ${containerDomain} (${taskPublicIp})`)
 };
 
@@ -89,7 +89,7 @@ async function fetchEniPublicIp(eniId) {
     return data.NetworkInterfaces[0].PrivateIpAddresses[0].Association.PublicIp;
 }
 
-function createChangeRecordSet(domain, publicIp) {
+function createRecordSet(domain, publicIp) {
     return {
         "Action": "UPSERT",
         "ResourceRecordSet": {
