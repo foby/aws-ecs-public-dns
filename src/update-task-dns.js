@@ -1,9 +1,10 @@
 'use strict';
 
-let AWS = require('aws-sdk');
-let ec2 = new AWS.EC2();
-let ecs = new AWS.ECS();
-let route53 = new AWS.Route53();
+const _ = require('lodash')
+const AWS = require('aws-sdk');
+const ec2 = new AWS.EC2();
+const ecs = new AWS.ECS();
+const route53 = new AWS.Route53();
 
 /**
  * Upsert a public ip DNS record for the incoming task.
@@ -51,32 +52,31 @@ async function fetchClusterTags(clusterArn) {
     const response = await ecs.listTagsForResource({
         resourceArn: clusterArn
     }).promise()
-    const tags = {}
-    for (let i=0; i<response.tags.length; i++) {
-        const tag = response.tags[i]
-        const key = tag['key']
-        const value = tag['value']
-        tags[key] =  value
-    }
-    return tags
+    return _.reduce(response.tags, function(hash, tag) {
+        var key = tag['key'];
+        hash[key] = tag['value'];
+        return hash;
+      }, {});
 }
 
 function getEniId(task) {
-    let eniAttachment = [];
-    for (let i = 0; i < task.attachments.length; i++) {
-        const attachment = task.attachments[i];
-        if (attachment.type === 'eni') {
-            eniAttachment = attachment;
-            break;
-        }
-    }
-    for (let i = 0; i < eniAttachment.details.length; i++) {
-        const detail = eniAttachment.details[i];
-        if (detail.name === 'networkInterfaceId') {
-            return detail.value;
-        }
-    }
-    return null;
+    return _.chain(task.attachments)
+    .filter(function(attachment) {
+        return attachment.type === 'eni'
+    })
+    .map(function(eniAttachment) {
+        return _.chain(eniAttachment.details)
+        .filter(function(details) {
+            return details.name === 'networkInterfaceId'
+        })
+        .map(function(details) {
+            return details.value
+        })
+        .head()
+        .value()
+    })
+    .head()
+    .value()
 }
 
 async function fetchEniPublicIp(eniId) {
