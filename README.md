@@ -14,6 +14,10 @@ A lambda function subscribes to an "ECS Task State Change" event. It gets called
 
 ## Installation
 
+First you need to pull NodeJs dependencies using:
+
+`npm install`
+
 You need to have the *Serverless Framework* CLI installed. 
 
 Deploy the function in your active AWS account:
