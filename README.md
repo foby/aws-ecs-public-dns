@@ -14,6 +14,10 @@ A lambda function subscribes to an "ECS Task State Change" event. It gets called
 
 ## Installation
 
+First you need to pull NodeJs dependencies using:
+
+`npm install`
+
 You need to have the *Serverless Framework* CLI installed. 
 
 Deploy the function in your active AWS account:
@@ -25,8 +29,8 @@ serverless deploy
 
 In your ECS console, select your cluster and add the tags
 
-* hostedZoneId (the hosted zone id of your public DNS namespace)
-* domain (the domain name of your public DNS namespace)
+* hostedZoneId (the hosted zone id of your public DNS namespace, for example `Z1OAI7EUAR14MP`)
+* domain (the domain name of your public DNS namespace, for example `foby.org`)
 
 ## Demo
 
