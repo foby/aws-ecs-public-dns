@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash')
 const AWS = require('aws-sdk');
 const ec2 = new AWS.EC2();
 const ecs = new AWS.ECS();
@@ -52,31 +51,18 @@ async function fetchClusterTags(clusterArn) {
     const response = await ecs.listTagsForResource({
         resourceArn: clusterArn
     }).promise()
-    return _.reduce(response.tags, function(hash, tag) {
-        var key = tag['key'];
-        hash[key] = tag['value'];
-        return hash;
-      }, {});
+    return response.tags.reduce((hash, tag) => {
+        return Object.assign(hash, {
+                [tag.key]: tag.value
+            });
+        }, {});
 }
 
 function getEniId(task) {
-    return _.chain(task.attachments)
-    .filter(function(attachment) {
-        return attachment.type === 'eni'
-    })
-    .map(function(eniAttachment) {
-        return _.chain(eniAttachment.details)
-        .filter(function(details) {
-            return details.name === 'networkInterfaceId'
-        })
-        .map(function(details) {
-            return details.value
-        })
-        .head()
-        .value()
-    })
-    .head()
-    .value()
+    return task.attachments
+        .find(attachment => attachment.type === 'eni')
+        ?.details.find(detail => detail.name === 'networkInterfaceId')
+        ?.value
 }
 
 async function fetchEniPublicIp(eniId) {
