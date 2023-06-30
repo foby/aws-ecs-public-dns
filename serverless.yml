@@ -5,7 +5,7 @@ service: fargate-dns-demo
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   region: eu-central-1
   iamRoleStatements:
     - Effect: "Allow"
